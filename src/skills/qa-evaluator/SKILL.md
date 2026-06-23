@@ -13,12 +13,28 @@ Skill ini mengevaluasi kualitas artefak QA (AC, TS, TC) dari tiket Jira berdasar
 
 1. Ambil tiket via `fetch_jira_ticket` — pastikan `field_config_found` true
 2. Periksa apakah field `acceptance_criteria` dan `test_case` memiliki konten
-3. Evaluasi setiap sub-kriteria → beri skor 0–100 menggunakan anchor di bawah
-4. Panggil `calculate_qa_score` untuk mendapatkan skor tertimbang final
-5. Analisis gap: Desc→AC, AC→TS, TS→TC
-6. Buat rekomendasi konkrit berdasarkan temuan
+3. **Identifikasi scope** dari AC dan description sebelum mengevaluasi coverage
+4. Evaluasi setiap sub-kriteria → beri skor 0–100 menggunakan anchor di bawah
+5. Panggil `calculate_qa_score` untuk mendapatkan skor tertimbang final
+6. Analisis gap: Desc→AC, AC→TS, TS→TC
+7. Buat rekomendasi konkrit berdasarkan temuan
 
 **Penting:** Jika field kosong (null / empty), beri skor **0** untuk semua sub-kriteria kategori tersebut.
+
+---
+
+## Evaluasi Berbasis Scope
+
+Sebelum mengevaluasi coverage, identifikasi scope dari AC atau description:
+
+- **In scope**: Hal-hal yang secara eksplisit disebutkan wajib diuji atau diimplementasikan
+- **Out of scope**: Hal-hal yang secara eksplisit dikecualikan, tidak diwajibkan, atau ditandai sebagai pengecualian (frasa seperti "tidak termasuk", "dikecualikan", "out of scope", "not in scope", "tidak perlu", "belum termasuk di sprint ini", dll.)
+
+**Aturan penilaian berbasis scope:**
+- Evaluasi coverage (`crucial_paths_covered`, `full_coverage`, `functional`, `edge_cases`, `security`, `visual_ui`, `flow_ux`, dll.) hanya berdasarkan item yang **in scope**
+- Item yang **out of scope** — jika tidak ada di TS atau TC — **TIDAK boleh menurunkan skor**
+- Jika AC atau description secara eksplisit mengecualikan suatu skenario, absennya skenario tersebut di TS/TC adalah benar dan tidak perlu direkomendasikan sebagai gap
+- Gap analysis juga harus memperhitungkan scope: jangan sebut item out-of-scope sebagai "missing coverage"
 
 ---
 
