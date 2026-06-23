@@ -79,28 +79,39 @@ export async function run({ init, payload }: FlueContext<Payload>) {
     const harness = await init(agent);
     const session = await harness.session();
 
-    // --- Prompt 1: Fetch ticket + Task Feasibility ---
+    // --- Prompt 1: Fetch ticket + Task Feasibility + Scope extraction ---
     const p1 = await session.prompt(
       `Ambil tiket Jira "${ticketId}".
 - Jika field_config_found false → panggil discover_jira_fields dulu, lalu fetch_jira_ticket ulang.
 - Evaluasi Task Feasibility menggunakan rubrik sub-kriteria di skill.
 - PENTING: Jika field acceptance_criteria (AC QA) sudah diisi, gunakan sebagai bukti tambahan untuk menilai kualitas description. AC QA mencerminkan scope implementasi aktual. Jika scope AC QA jauh lebih luas dari description (misal: description hanya menyebut 1 kasus tapi AC QA mencakup arsitektur, UI baru, dan business rules yang tidak disebutkan di description) → ini bukti description underspecified → turunkan skor completeness, business_rules, actionability, dan scope_boundary sesuai gap yang ditemukan.
-- Kembalikan: ringkasan tiket (1–2 kalimat), URL tiket, skor tiap sub-kriteria Task Feasibility, dan rationale singkat.`,
+- Identifikasi scope dari AC dan description:
+  * inScope: daftar fitur/skenario/area yang secara eksplisit wajib diuji atau diimplementasikan
+  * outOfScope: daftar fitur/skenario/area yang secara eksplisit dikecualikan, tidak diwajibkan, atau ditandai sebagai pengecualian
+  * Jika tidak ada pernyataan scope eksplisit, kembalikan kedua list sebagai array kosong.
+- Kembalikan: ringkasan tiket (1–2 kalimat), URL tiket, skor tiap sub-kriteria Task Feasibility, rationale singkat, dan scopeContext.`,
       {
         result: v.object({
           ticketSummary: v.string(),
           ticketUrl: v.string(),
           rationaleFeasibility: v.string(),
           scores: feasibilityScoresSchema,
+          scopeContext: v.object({
+            inScope: v.array(v.string()),
+            outOfScope: v.array(v.string()),
+          }),
         }),
       },
     );
 
     // --- Prompt 2: Acceptance Criteria ---
+    const scopeNote = p1.data.scopeContext.outOfScope.length > 0
+      ? `\n- Scope yang teridentifikasi — In scope: ${JSON.stringify(p1.data.scopeContext.inScope)}; Out of scope: ${JSON.stringify(p1.data.scopeContext.outOfScope)}. Item yang out of scope TIDAK boleh menurunkan skor meski tidak ada coverage AC-nya.`
+      : '';
     const p2 = await session.prompt(
       `Sekarang evaluasi Acceptance Criteria dari tiket yang sama.
 - Gunakan rubrik sub-kriteria AC di skill.
-- Jika field acceptance_criteria kosong atau null → beri semua skor 0.
+- Jika field acceptance_criteria kosong atau null → beri semua skor 0.${scopeNote}
 - Kembalikan: skor tiap sub-kriteria AC dan rationale singkat.`,
       {
         result: v.object({
@@ -111,11 +122,14 @@ export async function run({ init, payload }: FlueContext<Payload>) {
     );
 
     // --- Prompt 3: Test Scenarios ---
+    const scopeNoteTs = p1.data.scopeContext.outOfScope.length > 0
+      ? `\n- Scope yang teridentifikasi — In scope: ${JSON.stringify(p1.data.scopeContext.inScope)}; Out of scope: ${JSON.stringify(p1.data.scopeContext.outOfScope)}. Evaluasi crucial_paths_covered dan full_coverage hanya berdasarkan item in scope. Absennya skenario untuk item out of scope TIDAK boleh menurunkan skor.`
+      : '';
     const p3 = await session.prompt(
       `Sekarang evaluasi Test Scenarios dari tiket yang sama.
 - Gunakan rubrik sub-kriteria TS di skill.
 - Data TS ada di field test_case. Jika berisi tabel, baca kolom Test Scenario.
-- Jika field test_case kosong atau null → beri semua skor 0.
+- Jika field test_case kosong atau null → beri semua skor 0.${scopeNoteTs}
 - Kembalikan: skor tiap sub-kriteria TS dan rationale singkat.`,
       {
         result: v.object({
@@ -126,11 +140,14 @@ export async function run({ init, payload }: FlueContext<Payload>) {
     );
 
     // --- Prompt 4: Test Cases + calculate_qa_score + gap analysis + rekomendasi ---
+    const scopeNoteTc = p1.data.scopeContext.outOfScope.length > 0
+      ? `\n- Scope yang teridentifikasi — In scope: ${JSON.stringify(p1.data.scopeContext.inScope)}; Out of scope: ${JSON.stringify(p1.data.scopeContext.outOfScope)}. Evaluasi semua sub-kriteria TC (functional, edge_cases, security, dll.) hanya berdasarkan item in scope. Absennya TC untuk item out of scope TIDAK boleh menurunkan skor. Gap analysis juga harus mengikuti scope ini: jangan sebut item out of scope sebagai missing coverage.`
+      : '';
     const p4 = await session.prompt(
       `Sekarang evaluasi Test Cases dari tiket yang sama.
 - Gunakan rubrik sub-kriteria TC di skill.
 - Data TC ada di field test_case. Jika berisi tabel, baca kolom Test Case & Evidence.
-- Jika field test_case kosong atau null → beri semua skor 0.
+- Jika field test_case kosong atau null → beri semua skor 0.${scopeNoteTc}
 
 Setelah mendapat skor TC, panggil calculate_qa_score dengan semua skor berikut:
 - taskFeasibility: ${JSON.stringify(p1.data.scores)}
@@ -178,6 +195,7 @@ Setelah calculate_qa_score dipanggil, kembalikan:
     return {
       ticketSummary: p1.data.ticketSummary,
       ticketUrl: p1.data.ticketUrl,
+      scopeContext: p1.data.scopeContext,
       taskFeasibilityScore: p4.data.taskFeasibilityScore,
       acScore: p4.data.acScore,
       tsScore: p4.data.tsScore,

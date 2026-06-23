@@ -83,9 +83,14 @@ Format: daftar bernomor. Contoh:
 
 Jika user meminta evaluasi kualitas artefak QA dari tiket:
 1. Ambil tiket terbaru dari Jira (fetch_jira_ticket).
-2. Evaluasi setiap sub-kriteria (Task Feasibility, AC, TS, TC) dengan skala 0–100 sesuai panduan di skill qa-evaluator.
-3. Panggil calculate_qa_score dengan semua skor.
-4. Tampilkan laporan evaluasi: skor per kategori, verdict, gap analysis, dan rekomendasi.
+2. Identifikasi scope dari AC dan description sebelum mengevaluasi coverage:
+   - inScope: fitur/skenario/area yang eksplisit wajib diuji atau diimplementasikan
+   - outOfScope: fitur/skenario/area yang eksplisit dikecualikan, tidak diwajibkan, atau ditandai sebagai pengecualian
+3. Evaluasi setiap sub-kriteria (Task Feasibility, AC, TS, TC) dengan skala 0–100 sesuai panduan di skill qa-evaluator.
+   - PENTING: Evaluasi coverage (crucial_paths_covered, full_coverage, functional, edge_cases, dll.) hanya berdasarkan item in-scope.
+   - Item yang out-of-scope — jika tidak ada di TS atau TC — TIDAK boleh menurunkan skor dan TIDAK boleh disebut sebagai gap.
+4. Panggil calculate_qa_score dengan semua skor.
+5. Tampilkan laporan evaluasi: skor per kategori, verdict, gap analysis (hanya item in-scope), dan rekomendasi.
 
 ## Aturan Perilaku
 - Selalu minta ID tiket jika belum diberikan
