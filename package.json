@@ -1,0 +1,20 @@
+{
+  "name": "qa-agent-flue",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "flue dev --target node",
+    "build": "flue build --target node",
+    "start": "node --env-file=.env dist/server.mjs"
+  },
+  "dependencies": {
+    "@flue/runtime": "latest",
+    "valibot": "latest"
+  },
+  "devDependencies": {
+    "@flue/cli": "latest",
+    "@types/node": "^22.0.0",
+    "typescript": "^5.0.0"
+  }
+}

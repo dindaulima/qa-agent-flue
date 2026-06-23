@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(curl -s http://localhost:3583/health)",
+      "Bash(curl -s -X POST http://localhost:3583/api/workflows/generate-ac -H 'Content-Type: application/json' -H 'x-api-secret: Pdxw154F6XrzY3zgQkU2pwHq8IKZlxXG7KjW' -d '{\"ticketId\": \"TEST-1\"}')",
+      "Bash(curl -s http://localhost:3583/api/runs/workflow:generate-ac:01KV9MH1743YHE0E3DH9WC4J7Q)",
+      "Bash(curl -s http://localhost:3583/api/runs/workflow:generate-ac:01KV9MHSZJ5Z131R0QSD1CVEZM)",
+      "Bash(curl -v http://localhost:3583/api/runs/workflow:generate-ac:01KV9MHSZJ5Z131R0QSD1CVEZM)",
+      "Bash(curl -s -X POST http://localhost:3583/api/workflows/generate-ac?wait=result -H 'Content-Type: application/json' -H 'x-api-secret: Pdxw154F6XrzY3zgQkU2pwHq8IKZlxXG7KjW' -d '{\"ticketId\": \"TEST-1\"}')",
+      "Bash(curl -s http://localhost:3583/api/runs)"
+    ]
+  }
+}
