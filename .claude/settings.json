@@ -67,7 +67,13 @@
       "Bash(pkill -f \"dist/server.mjs\")",
       "Bash(python3 -m json.tool)",
       "Bash(node --env-file=.env dist/server.mjs)",
-      "Bash(kill 175077)"
+      "Bash(kill 175077)",
+      "Bash(curl -s -X POST http://localhost:3583/api/workflows/generate-sign-off -H 'Content-Type: application/json' -H 'x-api-secret: Pdxw154F6XrzY3zgQkU2pwHq8IKZlxXG7KjW' -d '{\"ticketId\": \"BRAVO-1214\"}')",
+      "Bash(curl -s -X POST http://localhost:3583/api/workflows/generate-sign-off -H 'Content-Type: application/json' -H 'x-api-secret: Pdxw154F6XrzY3zgQkU2pwHq8IKZlxXG7KjW' -d '{\"ticketId\": \"BRAVO-957\"}')",
+      "Bash(curl -s \"http://localhost:3583/api/run-result/workflow:generate-sign-off:01KVSTRJFTAXGQ5ERT246AWQEP\" -H \"x-api-secret: Pdxw154F6XrzY3zgQkU2pwHq8IKZlxXG7KjW\")",
+      "Bash(curl -s \"http://localhost:3583/api/run-result/workflow:generate-sign-off:01KVSTXS2XHYAXT1TK3M99B16Z\" -H \"x-api-secret: Pdxw154F6XrzY3zgQkU2pwHq8IKZlxXG7KjW\")",
+      "Bash(curl -s -X POST http://localhost:3583/api/workflows/generate-sign-off -H 'Content-Type: application/json' -H 'x-api-secret: Pdxw154F6XrzY3zgQkU2pwHq8IKZlxXG7KjW' -d '{\"ticketId\": \"BRAVO-978\"}')",
+      "Bash(node /home/sevima-330/Documents/qa-agent-flue/dist/server.mjs --env-file=/home/sevima-330/Documents/qa-agent-flue/.env)"
     ],
     "additionalDirectories": [
       "/tmp"

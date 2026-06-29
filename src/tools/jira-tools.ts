@@ -5,7 +5,7 @@ import { Type, defineTool } from '@flue/runtime';
 import { readFile, writeFile } from 'node:fs/promises';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { jiraGet } from './jira-client.ts';
+import { jiraGet, jiraPost } from './jira-client.ts';
 import { fieldText } from './adf.ts';
 
 const FIELDS_JSON = join(dirname(fileURLToPath(import.meta.url)), 'fields.json');
@@ -132,6 +132,66 @@ export const discoverJiraFields = defineTool({
     await writeFile(FIELDS_JSON, JSON.stringify(existing, null, 2));
 
     return `Saved field mapping for ${projectKey}: ${JSON.stringify(found)}`;
+  },
+});
+
+export const fetchEpicChildren = defineTool({
+  name: 'fetch_epic_children',
+  description: 'Fetch all child tickets under an Epic using JQL (supports both classic "Epic Link" and next-gen "parent" hierarchy). Returns ticket data including test_case content. Excludes Cancelled/Canceled/Backlog tickets.',
+  parameters: Type.Object({
+    epicId: Type.String({ description: 'Epic ticket ID, e.g. PROJ-100' }),
+  }),
+  execute: async ({ epicId }) => {
+    const projectKey = epicId.split('-')[0]!.toUpperCase();
+    const pf = await loadProjectFields(projectKey);
+
+    const customKeys = Object.values(pf);
+    const searchFields = [...new Set([...BASE_FIELDS, ...customKeys])].join(',');
+
+    // Issue key values must NOT be quoted in JQL; field names with spaces need quotes
+    const jql = `("Epic Link" = ${epicId} OR parent = ${epicId}) AND status NOT IN ("Cancelled", "Canceled", "Canceled", "Cancel", "Backlog") ORDER BY created ASC`;
+
+    const data = await jiraPost('/search/jql', {
+      jql,
+      fields: searchFields.split(','),
+      maxResults: 100,
+    }) as Record<string, unknown>;
+
+    const issues = (data['issues'] as unknown[]) ?? [];
+    const baseUrl = issues.length > 0
+      ? ((issues[0] as Record<string, unknown>)['self'] as string ?? '').split('/rest/')[0]
+      : '';
+
+    const hasPf = Object.keys(pf).length > 0;
+
+    const tickets = issues.map((issue: unknown) => {
+      const iss = issue as Record<string, unknown>;
+      const fields = (iss['fields'] ?? {}) as Record<string, unknown>;
+      const key = iss['key'] as string;
+      const testCaseText = hasPf ? fieldText(fields[pf['test_case'] ?? '']) : '';
+
+      return {
+        key,
+        url: `${baseUrl}/browse/${key}`,
+        summary: fieldText(fields['summary']),
+        type: fieldText(fields['issuetype']),
+        status: fieldText(fields['status']),
+        assignee: fieldText(fields['assignee']),
+        reporter: fieldText(fields['reporter']),
+        description: fieldText(fields['description']),
+        acceptance_criteria: hasPf ? fieldText(fields[pf['acceptance_criteria'] ?? '']) : '',
+        test_case: testCaseText,
+        has_test_case: testCaseText.trim().length > 0,
+        qa_feedback: hasPf ? fieldText(fields[pf['qa_feedback'] ?? '']) : '',
+      };
+    });
+
+    return JSON.stringify({
+      epicId,
+      field_config_found: hasPf,
+      total: tickets.length,
+      tickets,
+    }, null, 2);
   },
 });
 

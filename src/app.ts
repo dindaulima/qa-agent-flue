@@ -14,6 +14,7 @@ app.get('/health', c => c.json({ status: 'ok', service: 'qa-agent-flue' }));
 //            POST /api/workflows/write-jira-ac
 //            POST /api/workflows/write-jira-tc
 //            POST /api/workflows/evaluate-qa
+//            POST /api/workflows/generate-sign-off
 app.route('/api', flue());
 
 const requireSecret: MiddlewareHandler = async (c, next) => {

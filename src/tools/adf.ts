@@ -35,8 +35,11 @@ export function extractText(node: unknown): string {
       return content.map(c => extractText(c)).join('') + '\t';
     if (type === 'taskList')
       return content.map(c => extractText(c)).join('');
-    if (type === 'taskItem')
-      return content.map(c => extractText(c)).join('') + '\n';
+    if (type === 'taskItem') {
+      const state = ((n['attrs'] as AdfNode)?.['state'] as string) ?? 'TODO';
+      const prefix = state === 'DONE' ? '[x] ' : '[ ] ';
+      return prefix + content.map(c => extractText(c)).join('') + '\n';
+    }
     if (text) return text;
     return content.map(c => extractText(c)).join('');
   }
