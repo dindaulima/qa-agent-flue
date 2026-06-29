@@ -372,6 +372,108 @@ Generate & Write:
 
 Evaluasi kualitas (bisa dijalankan kapan saja setelah AC/TS/TC ada):
 5. evaluate-qa   →  Skor, verdict, gap analysis, dan rekomendasi
+
+Sign-Off Document:
+6. generate-sign-off  →  Dokumen sign-off markdown dari 1 ticket atau seluruh Epic
+```
+
+---
+
+### Generate Sign-Off Document
+
+```
+POST /api/workflows/generate-sign-off
+```
+
+Fetch tiket Jira (atau seluruh child card di bawah Epic) → hitung metrics TS/TC → generate dokumen **Software Testing Sign-Off** dalam format markdown.
+
+- Input tiket **bukan Epic**: proses 1 tiket
+- Input tiket **Epic**: otomatis ambil semua child card yang memiliki Test Case, skip card dengan status Cancelled/Canceled/Backlog
+
+**Headers:**
+```
+Content-Type: application/json
+x-api-secret: {API_SECRET}
+```
+
+**Body:**
+```json
+{
+  "ticketId": "PROJ-123"
+}
+```
+
+**Response sukses (async — poll via `/api/run-result/{runId}`):**
+```json
+{
+  "status": "accepted",
+  "runId": "workflow:generate-sign-off:01KVXXXX"
+}
+```
+
+**Hasil setelah poll completed:**
+```json
+{
+  "status": "completed",
+  "result": {
+    "ticketId": "PROJ-123",
+    "isEpic": true,
+    "processedTickets": 5,
+
+    "totalScenario": 47,
+    "totalTc": 96,
+    "passedTc": 96,
+    "failedTc": 0,
+
+    "developer": "Ahmad Za'id; Muhammad Ma'ruf Ilyasa'",
+    "qa": "Dinda Ulima",
+
+    "signOffMarkdown": "# SOFTWARE TESTING SIGN-OFF DOCUMENT\n\n---\n\n## Summary\n..."
+  },
+  "durationMs": 130000
+}
+```
+
+**Keterangan field result:**
+
+| Field | Keterangan |
+|---|---|
+| `ticketId` | Ticket ID yang diinput |
+| `isEpic` | `true` jika input adalah Epic |
+| `processedTickets` | Jumlah tiket yang diproses (child cards dengan TC) |
+| `totalScenario` | Total Test Scenario dari semua tiket |
+| `totalTc` | Total Test Case (`[+]` dan `[-]`) dari semua tiket |
+| `passedTc` | TC yang passed (dicentang atau seluruh TC jika TS status = passed) |
+| `failedTc` | `totalTc - passedTc` |
+| `developer` | Assignee dari tiket Jira |
+| `qa` | QA person yang ditemukan dari data tiket |
+| `signOffMarkdown` | Dokumen sign-off lengkap dalam format markdown |
+
+**Response jika tidak ada TC:**
+```json
+{
+  "status": "completed",
+  "result": {
+    "error": true,
+    "message": "Tidak ada ticket dengan Test Case yang ditemukan."
+  }
+}
+```
+
+> **Catatan:** Workflow ini berjalan **async** (tidak support `?wait=result`). Selalu gunakan mode poll via `/api/run-result/{runId}`. Estimasi durasi: 1–2 menit untuk single ticket, 3–5 menit untuk Epic dengan banyak child cards.
+
+**Contoh curl:**
+```bash
+# Step 1 — Mulai run
+RUN=$(curl -s -X POST "http://localhost:3583/api/workflows/generate-sign-off" \
+  -H "Content-Type: application/json" \
+  -H "x-api-secret: your-secret-key" \
+  -d '{"ticketId": "PROJ-123"}')
+RUN_ID=$(echo $RUN | grep -o '"runId":"[^"]*"' | cut -d'"' -f4)
+
+# Step 2 — Poll hasil
+curl "http://localhost:3583/api/run-result/$RUN_ID" \
+  -H "x-api-secret: your-secret-key"
 ```
 
 ---
@@ -461,6 +563,7 @@ Koneksi HTTP ditahan sampai proses selesai. Sesuaikan timeout di client:
 | `evaluate-qa` | 300 detik |
 | `write-jira-ac` | 30 detik |
 | `write-jira-tc` | 30 detik |
+| `generate-sign-off` | — (async only, tidak support `?wait=result`) |
 
 Untuk Postman: **Settings → General → Request timeout** → set ke `0` (tidak ada timeout).
 

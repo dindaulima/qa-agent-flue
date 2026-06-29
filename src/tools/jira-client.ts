@@ -44,6 +44,20 @@ export async function jiraGet(path: string, params?: Record<string, string>): Pr
   return res.json();
 }
 
+export async function jiraPost(path: string, payload: unknown): Promise<unknown> {
+  const config = getJiraConfig();
+  const res = await fetch(`${config.baseUrl}/rest/api/3${path}`, {
+    method: 'POST',
+    headers: authHeader(config),
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) {
+    const body = await res.text();
+    throw new Error(`Jira POST ${path} → ${res.status}: ${body}`);
+  }
+  return res.json();
+}
+
 export async function jiraPut(path: string, payload: unknown): Promise<void> {
   const config = getJiraConfig();
   const res = await fetch(`${config.baseUrl}/rest/api/3${path}`, {
