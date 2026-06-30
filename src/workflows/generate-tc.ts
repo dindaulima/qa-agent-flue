@@ -18,8 +18,6 @@ const agent = createAgent(() => ({
   model: MODEL,
   instructions: `Kamu adalah QA Analyst. Kamu bekerja dalam dua fase saat diminta. Gunakan Bahasa Indonesia untuk semua output.
 
-Saat fetch tiket: jika field_config_found bernilai false, panggil discover_jira_fields dulu, lalu ulangi fetch_jira_ticket.
-
 ## Aturan TS
 - Judul: "[Aktor] dapat [melakukan sesuatu]" atau "[Aktor] tidak dapat [melakukan sesuatu]"
 - Format Gherkin: Given / When / Then sebagai bullet list
