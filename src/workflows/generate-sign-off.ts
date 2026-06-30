@@ -72,7 +72,6 @@ export async function run({ init, payload }: FlueContext<Payload>) {
     // --- Prompt 1: Fetch, filter, compute, extract → return COMPACT data only ---
     const p1 = await session.prompt(
       `Ambil tiket Jira "${ticketId}".
-- Jika field_config_found false → panggil discover_jira_fields dulu, lalu fetch ulang.
 - Cek apakah tiket ini bertipe Epic.
   * Jika Epic → panggil fetch_epic_children("${ticketId}").
   * Jika bukan Epic → gunakan tiket ini saja.

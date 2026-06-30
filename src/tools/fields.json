@@ -1,0 +1,47 @@
+{
+  "BRAVO": {
+    "acceptance_criteria": "customfield_10535",
+    "qa_feedback": "customfield_10537",
+    "test_case": "customfield_10538"
+  },
+  "WOLVERINE": {
+    "acceptance_criteria": "customfield_10442",
+    "test_case": "customfield_10441",
+    "qa_tester": "customfield_11322",
+    "qa_feedback": "customfield_10443"
+  },
+  "ALPHA": {
+    "qa_feedback": "customfield_10544",
+    "test_case": "customfield_10543",
+    "acceptance_criteria": "customfield_10527",
+    "qa_tester": "customfield_10529"
+  },
+  "FOX": {
+    "qa_feedback": "customfield_10554",
+    "test_case": "customfield_10542",
+    "acceptance_criteria": "customfield_10522",
+    "qa_tester": "customfield_10523"
+  },
+  "DELTA": {
+    "qa_feedback": "customfield_10549",
+    "acceptance_criteria": "customfield_10528",
+    "test_case": "customfield_10542",
+    "qa_tester": "customfield_10517"
+  },
+  "TRF": {
+    "acceptance_criteria": "customfield_11025",
+    "qa_feedback": "customfield_11223",
+    "qa_tester": "customfield_11026",
+    "test_case": "customfield_10542"
+  },
+  "SFTDEV": {
+    "qa_tester": "customfield_11091",
+    "test_case": "customfield_11098"
+  },
+  "CHARLIE": {
+    "qa_feedback": "customfield_10525",
+    "test_case": "customfield_10542",
+    "acceptance_criteria": "customfield_10515",
+    "qa_tester": "customfield_10516"
+  }
+}

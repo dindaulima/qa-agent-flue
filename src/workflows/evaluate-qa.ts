@@ -82,7 +82,6 @@ export async function run({ init, payload }: FlueContext<Payload>) {
     // --- Prompt 1: Fetch ticket + Task Feasibility + Scope extraction ---
     const p1 = await session.prompt(
       `Ambil tiket Jira "${ticketId}".
-- Jika field_config_found false → panggil discover_jira_fields dulu, lalu fetch_jira_ticket ulang.
 - Evaluasi Task Feasibility menggunakan rubrik sub-kriteria di skill.
 - PENTING: Jika field acceptance_criteria (AC QA) sudah diisi, gunakan sebagai bukti tambahan untuk menilai kualitas description. AC QA mencerminkan scope implementasi aktual. Jika scope AC QA jauh lebih luas dari description (misal: description hanya menyebut 1 kasus tapi AC QA mencakup arsitektur, UI baru, dan business rules yang tidak disebutkan di description) → ini bukti description underspecified → turunkan skor completeness, business_rules, actionability, dan scope_boundary sesuai gap yang ditemukan.
 - Identifikasi scope dari AC dan description:
