@@ -59,10 +59,6 @@ export function fieldText(value: unknown): string {
 
 // ── Markdown → ADF ───────────────────────────────────────────────────────────
 
-function makeId(): string {
-  return crypto.randomUUID();
-}
-
 function txt(text: string, bold = false): AdfNode {
   const node: AdfNode = { type: 'text', text };
   if (bold) node['marks'] = [{ type: 'strong' }];
@@ -79,16 +75,6 @@ function cell(content: AdfNode[]): AdfNode {
 
 function headerCell(label: string): AdfNode {
   return { type: 'tableHeader', attrs: {}, content: [para(txt(label, true))] };
-}
-
-function bulletList(items: string[]): AdfNode {
-  return {
-    type: 'bulletList',
-    content: items.map(item => ({
-      type: 'listItem',
-      content: [para(txt(item))],
-    })),
-  };
 }
 
 export function markdownToAdf(text: string): AdfNode {
@@ -158,93 +144,79 @@ export function markdownToAdf(text: string): AdfNode {
 }
 
 // ── TC table (tc.md) → ADF table ─────────────────────────────────────────────
+//
+// One row = one Feature group: a Gherkin block (Feature/Background/Scenarios)
+// covering a related theme, paired with a [+]/[-] checklist where each item
+// maps 1:1 to one Scenario in the block.
 
-export interface TcScenario {
-  title: string;
-  type: string;
-  priority: string;
-  given: string[];
-  when: string[];
-  then: string[];
+export interface TcGroup {
+  gherkin: string;
   tcs: string[];
 }
 
-export function parseTcMarkdown(text: string): TcScenario[] {
-  const scenarios: TcScenario[] = [];
-  let current: TcScenario | null = null;
-  let section: 'given' | 'when' | 'then' | 'tc' | null = null;
+export function parseTcMarkdown(text: string): TcGroup[] {
+  const groups: TcGroup[] = [];
+  const lines = text.split('\n');
+  let i = 0;
 
-  for (const raw of text.split('\n')) {
-    const line = raw.trim();
+  while (i < lines.length) {
+    if (!/^###\s/.test(lines[i]!.trim())) { i++; continue; }
+    i++;
 
-    if (line.startsWith('### ')) {
-      if (current) scenarios.push(current);
-      current = { title: line.replace(/^###\s*/, ''), type: '', priority: 'S', given: [], when: [], then: [], tcs: [] };
-      section = null;
-      continue;
+    while (i < lines.length && !lines[i]!.trim().startsWith('```')) i++;
+    if (i >= lines.length) break;
+    i++;
+
+    const gherkinLines: string[] = [];
+    while (i < lines.length && !lines[i]!.trim().startsWith('```')) {
+      gherkinLines.push(lines[i]!);
+      i++;
     }
-    if (!current) continue;
+    i++;
 
-    if (line.startsWith('**Type:**')) { current.type = line.slice(9).trim(); continue; }
-    if (line.startsWith('**Priority:**')) { current.priority = line.slice(13).trim(); continue; }
-    if (line.startsWith('**Given**')) { section = 'given'; const r = line.slice(9).trim(); if (r) current.given.push(r); continue; }
-    if (line.startsWith('**When**')) { section = 'when'; const r = line.slice(8).trim(); if (r) current.when.push(r); continue; }
-    if (line.startsWith('**Then**')) { section = 'then'; const r = line.slice(8).trim(); if (r) current.then.push(r); continue; }
-    if (line.startsWith('**TC') && line.includes(':')) { section = 'tc'; continue; }
-
-    if ((section === 'given' || section === 'when' || section === 'then') && line.startsWith('- '))
-      current[section].push(line.slice(2));
-    else if (section === 'tc') {
-      if (line.startsWith('[+]') || line.startsWith('[-]'))
-        current.tcs.push(line);
-      else if (line.startsWith('- [+]') || line.startsWith('- [-]'))
-        current.tcs.push(line.slice(2));
+    const tcs: string[] = [];
+    while (i < lines.length && !/^###\s/.test(lines[i]!.trim())) {
+      const line = lines[i]!.trim();
+      if (line.startsWith('[+]') || line.startsWith('[-]')) tcs.push(line);
+      else if (line.startsWith('- [+]') || line.startsWith('- [-]')) tcs.push(line.slice(2));
+      i++;
     }
+
+    const gherkin = gherkinLines.join('\n').trim();
+    if (gherkin) groups.push({ gherkin, tcs });
   }
 
-  if (current) scenarios.push(current);
-  return scenarios;
+  return groups;
 }
 
-export function scenariosToAdfTable(scenarios: TcScenario[]): AdfNode {
+export function scenariosToAdfTable(groups: TcGroup[]): AdfNode {
   const header: AdfNode = {
     type: 'tableRow',
     content: [
       headerCell('Test Scenario'),
-      headerCell('Type'),
-      headerCell('Test Case & Evidence'),
-      headerCell('Priority'),
+      headerCell('Evidence'),
       headerCell('Status'),
     ],
   };
 
-  const rows = scenarios.map(s => {
-    const scenarioNodes: AdfNode[] = [para(txt(s.title))];
-    if (s.given.length) { scenarioNodes.push(para(txt('Given: '))); scenarioNodes.push(bulletList(s.given)); }
-    if (s.when.length) { scenarioNodes.push(para(txt('When: '))); scenarioNodes.push(bulletList(s.when)); }
-    if (s.then.length) { scenarioNodes.push(para(txt('Then: '))); scenarioNodes.push(bulletList(s.then)); }
+  const rows = groups.map(g => {
+    const scenarioCell = cell([
+      { type: 'codeBlock', attrs: { language: 'gherkin' }, content: [{ type: 'text', text: g.gherkin }] },
+    ]);
 
-    const tcCell: AdfNode = s.tcs.length === 0
+    const tcCell: AdfNode = g.tcs.length === 0
       ? cell([para(txt(''))])
       : cell([{
-          type: 'taskList',
-          attrs: { localId: makeId() },
-          content: s.tcs.map(tc => ({
-            type: 'taskItem',
-            attrs: { localId: makeId(), state: 'TODO' },
-            content: [txt(tc)],
+          type: 'orderedList',
+          content: g.tcs.map(tc => ({
+            type: 'listItem',
+            content: [para(txt(tc))],
           })),
         }]);
 
     return {
       type: 'tableRow',
-      content: [
-        cell(scenarioNodes),
-        cell([para(txt(s.type))]),
-        tcCell,
-        cell([para(txt(s.priority))]),
-        cell([para(txt(''))]),
-      ],
+      content: [scenarioCell, tcCell, cell([para(txt(''))])],
     };
   });
 

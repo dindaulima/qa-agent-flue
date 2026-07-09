@@ -28,26 +28,38 @@ Sebelum menulis TC, selalu cek dulu dengan `check_jira_tc_field`:
 
 Gunakan tool `write_jira_tc` dengan full content `tc.md` sebagai input.
 
-Format tc.md yang diharapkan:
+Format tc.md yang diharapkan — satu blok per grup Feature (satu grup = satu baris tabel):
 
+````
+### Group 1
+```gherkin
+Feature: [Nama Fitur] - [Tema grup]
+  Sebagai [Aktor]
+  Saya ingin [goal]
+  Agar [benefit]
+
+  Background:
+    Given [precondition]
+
+  ============================================================
+
+  Scenario: 1.1 - [+] [judul skenario positif]
+    When [langkah]
+    Then [hasil]
+
+  Scenario: 1.2 - [-] [judul skenario negatif]
+    When [langkah]
+    Then [hasil]
 ```
-### TS-01: [Title]
-**Type:** Functional
-**Priority:** M
-
-**Given**
-- [precondition]
-**When**
-- [step]
-**Then**
-- [outcome]
 
 **TC:**
-[+] Positive test case
-[-] Negative test case
-```
+[+] [judul skenario positif]
+[-] [judul skenario negatif]
 
-Output di Jira: tabel dengan kolom **Test Scenario | Type | Test Case & Evidence | Priority | Status**.
+---
+````
+
+Output di Jira: tabel dengan kolom **Test Scenario | Evidence | Status**. Kolom Test Scenario berisi blok Gherkin (code block) per grup; kolom Evidence berisi daftar bernomor biasa (ordered list, bukan checklist) `[+]`/`[-]` — satu item per Scenario dalam grup tersebut, urutannya mengikuti urutan Scenario di blok Gherkin (nomor list 1, 2, 3, ... sudah cukup mewakili tanpa perlu menuliskan ulang nomor grup.scenario seperti 1.1/1.2).
 
 ---
 

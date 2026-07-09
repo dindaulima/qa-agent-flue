@@ -26,7 +26,7 @@ const agent = createAgent(() => ({
 - Skor harus mencerminkan kualitas aktual konten — tidak terlalu generous, tidak terlalu strict.
 - Kutip contoh konkrit dari konten tiket saat menjelaskan skor.
 - Jika field kosong atau null → beri skor 0 untuk semua sub-kriteria kategori tersebut.
-- Gunakan field test_case untuk mengevaluasi TS dan TC. Jika berisi tabel, kolom Test Scenario = TS, kolom Test Case & Evidence = TC.`,
+- Gunakan field test_case untuk mengevaluasi TS dan TC. Jika berisi tabel, kolom Test Scenario = TS, kolom Evidence = TC.`,
 
   tools: [fetchJiraTicket, discoverJiraFields, fetchJiraField, calculateQaScore],
   skills: [qaEvaluatorSkill],
@@ -145,7 +145,7 @@ export async function run({ init, payload }: FlueContext<Payload>) {
     const p4 = await session.prompt(
       `Sekarang evaluasi Test Cases dari tiket yang sama.
 - Gunakan rubrik sub-kriteria TC di skill.
-- Data TC ada di field test_case. Jika berisi tabel, baca kolom Test Case & Evidence.
+- Data TC ada di field test_case. Jika berisi tabel, baca kolom Evidence.
 - Jika field test_case kosong atau null → beri semua skor 0.${scopeNoteTc}
 
 Setelah mendapat skor TC, panggil calculate_qa_score dengan semua skor berikut:

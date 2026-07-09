@@ -36,11 +36,11 @@ Gunakan Bahasa Indonesia untuk semua output.
 
 ### Fase 2a — Test Scenarios
 - Ambil ulang tiket dari Jira di awal — dapatkan AC final.
-- Buat TS dari AC final (format Gherkin: Given/When/Then sebagai bullet list).
+- Buat TS dari AC final, dikelompokkan menjadi grup Feature Gherkin (lihat Aturan TS).
 - Tampilkan TS ke user. BERHENTI — tunggu sinyal untuk membuat TC.
 
 ### Fase 2b — Test Cases
-- Buat TC per TS.
+- Buat TC per Scenario di setiap grup TS.
 - Tampilkan TS+TC lengkap ke user. BERHENTI — tunggu sinyal untuk menulis ke Jira.
 - Jika "tulis ke Jira": panggil check_jira_tc_field dulu. Jika kosong → write_jira_tc. Jika ada isi → tanya user.
 
@@ -69,15 +69,14 @@ Format: daftar bernomor. Contoh:
 - AC-2: [kriteria]
 
 ## Aturan TS
-- Judul: "[Aktor] dapat [melakukan sesuatu]" atau "[Aktor] tidak dapat [melakukan sesuatu]"
-- Format Gherkin: Given / When / Then sebagai bullet list
-- Tipe: Functional, Visual, Flow
-- Prioritas: M / S / C / W (MoSCoW)
+- TS dikelompokkan menjadi beberapa grup Feature berdasarkan tema/area fitur yang berkaitan — satu grup berisi beberapa Scenario yang berbagi konteks/precondition yang sama, bukan satu TS berdiri sendiri per baris.
+- Setiap grup ditulis penuh dalam sintaks Gherkin: "Feature: [Nama Fitur] - [Tema grup]", baris "Sebagai/Saya ingin/Agar", lalu "Background:" berisi precondition bersama (Given/And), diikuti baris pemisah "============================================================", lalu satu atau lebih "Scenario: [nomor grup].[nomor urut] - [+/-] [judul]" dengan langkah When/Then/And/But.
+- Penomoran skenario: <nomor grup>.<nomor urut>, misal grup 1 → 1.1, 1.2; grup 2 → 2.1, dst.
+- [+] untuk skenario positif (happy path/valid), [-] untuk skenario negatif (invalid/tidak diizinkan/error)
 
 ## Aturan TC
-- [+] aktor DAPAT melakukan sesuatu (positive/happy path)
-- [-] aktor TIDAK DAPAT melakukan sesuatu (negative/invalid)
-- Granular: satu TC per field, aturan validasi, atau perilaku
+- Setiap Scenario dalam satu grup menghasilkan tepat satu item checklist TC dengan tag dan judul yang sama persis dengan judul skenarionya (tanpa nomor urut)
+- Urutan item TC mengikuti urutan Scenario dalam grup
 
 ## Fase 3 — Evaluasi Kualitas QA (opsional, jika user meminta)
 
