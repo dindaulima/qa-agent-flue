@@ -4,7 +4,7 @@
 
 ```env
 # Model AI yang digunakan
-MODEL=openai/gpt-5.4-mini
+MODEL=openai/gpt-5.4-nano
 # atau
 MODEL=anthropic/claude-sonnet-4-6
 

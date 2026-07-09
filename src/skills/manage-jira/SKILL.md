@@ -43,23 +43,30 @@ Feature: [Nama Fitur] - [Tema grup]
 
   ============================================================
 
-  Scenario: 1.1 - [+] [judul skenario positif]
+  Scenario: 1.1 - [+][P0] [judul skenario positif]
     When [langkah]
     Then [hasil]
 
-  Scenario: 1.2 - [-] [judul skenario negatif]
+  Scenario: 1.2 - [-][P1] [judul skenario negatif]
     When [langkah]
     Then [hasil]
 ```
 
 **TC:**
-[+] [judul skenario positif]
-[-] [judul skenario negatif]
+[+][P0] [judul skenario positif]
+[-][P1] [judul skenario negatif]
 
 ---
 ````
 
-Output di Jira: tabel dengan kolom **Test Scenario | Evidence | Status**. Kolom Test Scenario berisi blok Gherkin (code block) per grup; kolom Evidence berisi daftar bernomor biasa (ordered list, bukan checklist) `[+]`/`[-]` — satu item per Scenario dalam grup tersebut, urutannya mengikuti urutan Scenario di blok Gherkin (nomor list 1, 2, 3, ... sudah cukup mewakili tanpa perlu menuliskan ulang nomor grup.scenario seperti 1.1/1.2).
+Setiap Scenario (TS) diberi Priority (`P0`/`P1`/`P2`) tepat setelah tag `[+]`/`[-]`, dalam kurung siku terpisah — `[+][P0]`, `[-][P1]`, dst:
+- `P0` (Must Have) — happy path, error kritis, business rules enforcement, auth baseline
+- `P1` (Should Have) — alternative path, edge cases, resilience, grey box case
+- `P2` (Could Have) — fitur nice to have, skenario dengan frekuensi rendah, UI polish
+
+Item TC di bagian `**TC:**` meng-copy persis tag dan Priority dari Scenario yang bersangkutan (format sama: `[+][P0] [judul]`) — bukan dinilai ulang.
+
+Output di Jira: tabel dengan kolom **Test Scenario | Evidence | Status**. Kolom Test Scenario berisi blok Gherkin (code block) per grup — Priority tiap Scenario terlihat di sana. Kolom Evidence berisi daftar bernomor biasa (ordered list, bukan checklist) `[+][P0]`/`[-][P1]` dst — satu item per Scenario dalam grup tersebut, urutannya mengikuti urutan Scenario di blok Gherkin (nomor list 1, 2, 3, ... sudah cukup mewakili tanpa perlu menuliskan ulang nomor grup.scenario seperti 1.1/1.2).
 
 ---
 

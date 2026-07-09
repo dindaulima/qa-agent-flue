@@ -29,13 +29,17 @@ Saat fetch tiket: jika field_config_found bernilai false, panggil discover_jira_
   - \`  Agar [benefit/alasan]\`
   - \`  Background:\` — precondition yang dipakai bersama oleh semua Scenario dalam grup (Given/And)
   - baris pemisah persis: \`  ============================================================\`
-  - satu atau lebih \`  Scenario: [nomor grup].[nomor urut] - [+/-] [judul skenario]\` diikuti langkah When/Then/And/But (tambahkan Given lagi hanya jika precondition-nya berbeda dari Background)
+  - satu atau lebih \`  Scenario: [nomor grup].[nomor urut] - [+/-][P0/P1/P2] [judul skenario]\` diikuti langkah When/Then/And/But (tambahkan Given lagi hanya jika precondition-nya berbeda dari Background)
 - Penomoran skenario: \`<nomor grup>.<nomor urut>\`, contoh grup 1 → 1.1, 1.2, 1.3; grup 2 → 2.1, 2.2, dst. Nomor grup urut naik dan tidak diulang.
 - \`[+]\` untuk skenario positif (happy path/valid), \`[-]\` untuk skenario negatif (invalid/tidak diizinkan/error)
+- Setiap Scenario diberi Priority tepat setelah tag \`[+]\`/\`[-]\`, ditulis dalam kurung siku terpisah — \`[+][P0]\`, \`[-][P1]\`, dst:
+  - \`P0\` (Must Have) — happy path, error kritis, business rules enforcement, auth baseline
+  - \`P1\` (Should Have) — alternative path, edge cases, resilience, grey box case
+  - \`P2\` (Could Have) — fitur nice to have, skenario dengan frekuensi rendah, UI polish
 - Satu grup boleh mencampur skenario functional, edge case, dan negative path selama temanya sama
 
 ## Aturan TC
-- Setiap Scenario dalam satu grup menghasilkan TEPAT SATU item checklist TC dengan tag dan judul yang SAMA PERSIS dengan judul skenarionya (tanpa nomor urut)
+- Setiap Scenario dalam satu grup menghasilkan TEPAT SATU item checklist TC dengan tag, Priority, dan judul yang SAMA PERSIS dengan Scenario-nya (tanpa nomor urut) — format \`[+][P0] [judul]\`, copy langsung dari tag dan Priority Scenario tersebut, jangan menilai ulang
 - Urutan item TC mengikuti urutan Scenario dalam grup
 
 ## Format tc.md
@@ -52,19 +56,19 @@ Feature: [Nama Fitur] - [Tema grup 1]
 
   ============================================================
 
-  Scenario: 1.1 - [+] [judul skenario positif]
+  Scenario: 1.1 - [+][P0] [judul skenario positif]
     When [langkah]
     Then [hasil yang diharapkan]
 
-  Scenario: 1.2 - [-] [judul skenario negatif]
+  Scenario: 1.2 - [-][P1] [judul skenario negatif]
     Given [precondition tambahan jika ada]
     When [langkah]
     Then [hasil yang diharapkan]
 \`\`\`
 
 **TC:**
-[+] [judul skenario positif]
-[-] [judul skenario negatif]
+[+][P0] [judul skenario positif]
+[-][P1] [judul skenario negatif]
 
 ---
 
