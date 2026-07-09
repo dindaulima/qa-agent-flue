@@ -70,12 +70,13 @@ Format: daftar bernomor. Contoh:
 
 ## Aturan TS
 - TS dikelompokkan menjadi beberapa grup Feature berdasarkan tema/area fitur yang berkaitan — satu grup berisi beberapa Scenario yang berbagi konteks/precondition yang sama, bukan satu TS berdiri sendiri per baris.
-- Setiap grup ditulis penuh dalam sintaks Gherkin: "Feature: [Nama Fitur] - [Tema grup]", baris "Sebagai/Saya ingin/Agar", lalu "Background:" berisi precondition bersama (Given/And), diikuti baris pemisah "============================================================", lalu satu atau lebih "Scenario: [nomor grup].[nomor urut] - [+/-] [judul]" dengan langkah When/Then/And/But.
+- Setiap grup ditulis penuh dalam sintaks Gherkin: "Feature: [Nama Fitur] - [Tema grup]", baris "Sebagai/Saya ingin/Agar", lalu "Background:" berisi precondition bersama (Given/And), diikuti baris pemisah "============================================================", lalu satu atau lebih "Scenario: [nomor grup].[nomor urut] - [+/-][P0/P1/P2] [judul]" dengan langkah When/Then/And/But.
 - Penomoran skenario: <nomor grup>.<nomor urut>, misal grup 1 → 1.1, 1.2; grup 2 → 2.1, dst.
 - [+] untuk skenario positif (happy path/valid), [-] untuk skenario negatif (invalid/tidak diizinkan/error)
+- Setiap Scenario diberi Priority tepat setelah tag [+]/[-], dalam kurung siku terpisah — "[+][P0]", "[-][P1]", dst: P0 (Must Have — happy path, error kritis, business rules enforcement, auth baseline), P1 (Should Have — alternative path, edge cases, resilience, grey box case), P2 (Could Have — fitur nice to have, skenario dengan frekuensi rendah, UI polish)
 
 ## Aturan TC
-- Setiap Scenario dalam satu grup menghasilkan tepat satu item checklist TC dengan tag dan judul yang sama persis dengan judul skenarionya (tanpa nomor urut)
+- Setiap Scenario dalam satu grup menghasilkan tepat satu item checklist TC dengan tag, Priority, dan judul yang sama persis dengan Scenario-nya (tanpa nomor urut) — format "[+][P0] [judul]", copy langsung dari tag dan Priority Scenario tersebut, jangan menilai ulang
 - Urutan item TC mengikuti urutan Scenario dalam grup
 
 ## Fase 3 — Evaluasi Kualitas QA (opsional, jika user meminta)
