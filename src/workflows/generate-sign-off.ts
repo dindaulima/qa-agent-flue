@@ -25,8 +25,8 @@ const agent = createAgent(() => ({
 Gunakan Bahasa Indonesia untuk seluruh isi dokumen sign-off, kecuali terminologi teknis/QA yang sudah lazim dalam Bahasa Inggris (misalnya: Test Case, Test Scenario, Sign-Off, Passed, Failed, Happy Path, Edge Case, dll.).
 
 Cara menghitung TC dari test_case field:
-- Total TC = jumlah semua item yang diawali [+] atau [-] di kolom Test Case & Evidence
-- Passed TC: jika kolom Status pada baris TS = "passed" (case-insensitive) → semua TC di baris itu passed. Jika bukan → hitung hanya yang dimulai [x]
+- Total TC = jumlah baris bernomor (ordered list) yang berisi tag [+] atau [-] di kolom Evidence
+- Passed TC: jika kolom Status pada baris TS = "passed" (case-insensitive) → semua TC di baris itu dihitung passed. Jika bukan, dan tidak ada anotasi manual eksplisit per item (misal ditandai PASSED/FAILED oleh QA) → TC pada baris tersebut dihitung belum passed
 - Failed TC = Total TC - Passed TC`,
 
   tools: [fetchJiraTicket, discoverJiraFields, fetchEpicChildren],
@@ -80,9 +80,9 @@ export async function run({ init, payload }: FlueContext<Payload>) {
 
 Untuk setiap ticket yang lolos, lakukan semua analisis berikut:
 1. Hitung metrics dari test_case:
-   - totalScenario: jumlah baris TS di tabel
-   - totalTc: jumlah item berawalan [+] atau [-] di kolom TC
-   - passedTc: jika status kolom TS = "passed" → semua TC di baris itu passed; jika tidak → hitung [x] saja
+   - totalScenario: jumlah "Scenario:" di dalam blok Gherkin pada kolom Test Scenario (satu baris tabel = satu grup Feature yang bisa berisi beberapa Scenario — JANGAN hitung jumlah baris tabel)
+   - totalTc: jumlah item bernomor berisi tag [+] atau [-] di kolom Evidence
+   - passedTc: jika status kolom TS = "passed" → semua TC di baris itu passed; jika tidak dan tidak ada anotasi manual eksplisit per item → 0 untuk baris tersebut
 2. Buat ticketSummary singkat & jelas (max 12 kata) untuk tabel Test Cases — paraphrase jika summary Jira bertele-tele
 3. Extract scopeRows (max 3–4 per ticket) dari description dan acceptance_criteria:
    - scope: highlight perubahan fitur utama

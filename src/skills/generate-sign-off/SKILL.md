@@ -106,11 +106,11 @@ Skill ini membuat dokumen **Software Testing Sign-Off** berdasarkan satu tiket J
 - **QA**: ambil dari `qa_feedback`, komentar, atau nama yang muncul di catatan QA. Jika tidak ada, kosongkan.
 
 ### Key Metrics
-- **Total Scenario**: jumlah Test Scenario (baris/row di tabel test_case) dari semua tickets
-- **Total Test Case**: jumlah item yang diawali `[+]` atau `[-]` di kolom TC dari semua tickets
+- **Total Scenario**: jumlah `Scenario:` (di dalam blok Gherkin kolom Test Scenario) dari semua tickets — SATU baris tabel bisa berisi beberapa Scenario karena dikelompokkan per grup Feature, jadi jangan hitung baris tabel
+- **Total Test Case**: jumlah item bernomor (ordered list) berisi tag `[+]` atau `[-]` di kolom Evidence dari semua tickets
 - **Passed Test Case**:
   - Jika status kolom **Status** pada baris TS = "passed" (case-insensitive) → semua TC di baris tersebut dihitung passed
-  - Jika status bukan "passed" → hitung hanya TC yang ditandai `[x]` (tercentang)
+  - Jika status bukan "passed" dan tidak ada anotasi manual eksplisit per item (misal ditandai PASSED/FAILED oleh QA) → TC pada baris tersebut dihitung belum passed (0)
 - **Failed Test Case** = Total TC − Passed TC
 - **Overall Status**:
   - Semua TC passed → "Approved"
